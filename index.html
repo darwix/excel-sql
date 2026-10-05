@@ -257,8 +257,13 @@
       <h1>Excel to Excel converter</h1>
       <p><small>Query a spreadsheet with SQL.</small></p>
       <h2>Source</h2>
-      <input type="file" id="file" accept=".xlsx,.xls,.csv" />
-      <select id="sheet" hidden></select>
+      <input
+        type="file"
+        id="file"
+        aria-label="Excel or CSV file"
+        accept=".xlsx,.xls,.csv"
+      />
+      <select id="sheet" aria-label="Sheet" hidden></select>
       <div><small>Table: </small><code id="tbl">-</code></div>
       <h2>Columns</h2>
       <ul id="cols"></ul>
@@ -272,6 +277,7 @@
     <main>
       <textarea
         id="sql"
+        aria-label="SQL query"
         spellcheck="false"
         placeholder="SELECT * FROM sheet1 WHERE ..."
       ></textarea>
