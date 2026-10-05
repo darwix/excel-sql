@@ -25,5 +25,9 @@ function stackSheets(sheets) {
     })),
   );
 }
+// Excel ranges often run past the real data; drop rows with nothing in them.
+function dropBlankRows(aoa) {
+  return aoa.filter((r) => r.some((c) => c != null && String(c).trim() !== ""));
+}
 if (typeof module !== "undefined")
-  module.exports = { snakeHeaders, stackSheets };
+  module.exports = { snakeHeaders, stackSheets, dropBlankRows };

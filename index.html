@@ -253,11 +253,9 @@
           });
           const orig = (aoa[0] || []).map((h) => h ?? "");
           const cols = snakeHeaders(orig);
-          const rows = aoa
-            .slice(1)
-            .map((r) =>
-              Object.fromEntries(cols.map((c, j) => [c, r[j] ?? null])),
-            );
+          const rows = dropBlankRows(aoa.slice(1)).map((r) =>
+            Object.fromEntries(cols.map((c, j) => [c, r[j] ?? null])),
+          );
           sheets[names[i]] = {
             label: sn,
             cols: cols.map((name, j) => ({ name, orig: orig[j] })),
