@@ -271,7 +271,6 @@
           sheets[names[i]] = {
             label: sn,
             cols: cols.map((name, j) => ({ name, orig: orig[j] })),
-            rows,
           };
           alasql(
             `DROP TABLE IF EXISTS \`${names[i]}\`; CREATE TABLE \`${names[i]}\``,
@@ -283,7 +282,10 @@
           .join("");
         $("sheet").hidden = names.length < 2;
         const all = stackSheets(
-          Object.values(sheets).map((s) => ({ label: s.label, rows: s.rows })),
+          Object.entries(sheets).map(([t, s]) => ({
+            label: s.label,
+            rows: alasql.tables[t].data,
+          })),
         );
         alasql("DROP TABLE IF EXISTS all_sheets; CREATE TABLE all_sheets");
         alasql.tables.all_sheets.data = all;
@@ -302,6 +304,10 @@
             return li;
           }),
         );
+        show(t);
+      }
+
+      function show(t) {
         listTables(t);
         $("sql").value = `SELECT * FROM ${t}`;
         run();
@@ -318,9 +324,7 @@
                 $("sheet").value = t;
                 pick(t);
               } else {
-                listTables(t);
-                $("sql").value = `SELECT * FROM ${t}`;
-                run();
+                show(t);
               }
             };
             return li;

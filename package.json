@@ -8,13 +8,9 @@
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
-  },
-  "lint-staged": {
-    "*": "prettier --write --ignore-unknown"
+    "pre-commit": "npx prettier --check ."
   },
   "devDependencies": {
-    "lint-staged": "^15.2.0",
     "prettier": "^3.3.0",
     "simple-git-hooks": "^2.11.0"
   }
