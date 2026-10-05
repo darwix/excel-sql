@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://darwix.github.io/excel-sql/sitemap.xml

@@ -3,7 +3,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Excel SQL Converter</title>
+    <title>Excel to Excel Converter with SQL</title>
+    <meta
+      name="description"
+      content="Convert Excel to Excel with SQL. Upload a spreadsheet, query every sheet as a table, preview the result, then copy it or download it as .xlsx. Runs in your browser."
+    />
+    <link rel="canonical" href="https://darwix.github.io/excel-sql/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Excel to Excel Converter with SQL" />
+    <meta
+      property="og:description"
+      content="Convert Excel to Excel with SQL. Upload a spreadsheet, query every sheet as a table, preview the result, then copy it or download it as .xlsx. Runs in your browser."
+    />
+    <meta property="og:url" content="https://darwix.github.io/excel-sql/" />
+    <meta name="twitter:card" content="summary" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232f6f5e'/%3E%3Ctext x='16' y='22' font-size='16' font-family='monospace' font-weight='700' text-anchor='middle' fill='white'%3ESQL%3C/text%3E%3C/svg%3E"
+    />
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alasql@4"></script>
     <script src="lib.js"></script>
@@ -53,6 +70,15 @@
         flex-direction: column;
         gap: 12px;
         min-width: 0;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      aside p {
+        margin-top: 0;
       }
       h2 {
         margin: 0 0 4px;
@@ -175,10 +201,24 @@
       }
       .empty {
         margin: 0;
-        padding: 48px 24px;
-        max-width: 42ch;
+        line-height: 1.7;
+        padding: 28px 24px;
+        max-width: 64ch;
         color: var(--muted);
         text-wrap: pretty;
+      }
+      .empty p {
+        margin: 0 0 12px;
+      }
+      .empty ol {
+        margin: 0 0 12px;
+        padding-left: 20px;
+        list-style: decimal;
+      }
+      .empty li {
+        font: inherit;
+        border: 0;
+        padding: 2px 0;
       }
       table {
         border-collapse: collapse;
@@ -214,6 +254,8 @@
   </head>
   <body>
     <aside>
+      <h1>Excel to Excel converter</h1>
+      <p><small>Query a spreadsheet with SQL.</small></p>
       <h2>Source</h2>
       <input type="file" id="file" accept=".xlsx,.xls,.csv" />
       <select id="sheet" hidden></select>
@@ -240,10 +282,33 @@
       </div>
       <div id="err"></div>
       <div id="preview">
-        <p class="empty">
-          Upload a spreadsheet to see it here. Each sheet becomes a table you
-          can query with SQL.
-        </p>
+        <div class="empty">
+          <p>
+            Upload an Excel or CSV file to query it with SQL. Nothing leaves
+            your browser.
+          </p>
+          <ol>
+            <li>
+              Upload a spreadsheet. Headers become SQL column names, so
+              <code>Order Date</code> is <code>order_date</code>.
+            </li>
+            <li>
+              Every sheet is a table. <code>all_sheets</code> stacks them all,
+              with a <code>sheet_name</code> column.
+            </li>
+            <li>
+              Type a query and see the preview, then copy the rows or download
+              an .xlsx.
+            </li>
+          </ol>
+          <p>
+            Example:
+            <code
+              >SELECT sheet_name AS sales_person, customer_name, quantity FROM
+              all_sheets WHERE quantity &gt; 10</code
+            >
+          </p>
+        </div>
       </div>
     </main>
     <script>
