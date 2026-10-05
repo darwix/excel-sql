@@ -14,4 +14,19 @@ function snakeHeaders(headers) {
     return seen[s] > 1 ? `${s}_${seen[s]}` : s;
   });
 }
-if (typeof module !== "undefined") module.exports = { snakeHeaders };
+// One SELECT per sheet, sheet name as sales_person, only columns every sheet has.
+// Explicit columns on purpose: AlaSQL drops columns after the first branch with `*`.
+function unionQuery(sheets) {
+  const cols = sheets[0].cols.filter((c) =>
+    sheets.every((s) => s.cols.includes(c)),
+  );
+  const list = cols.map((c) => `[${c}]`).join(", ");
+  return sheets
+    .map((s) => {
+      const label = String(s.label).trim().replace(/'/g, "''");
+      return `SELECT '${label}' AS sales_person, ${list} FROM \`${s.table}\``;
+    })
+    .join("\nUNION ALL\n");
+}
+if (typeof module !== "undefined")
+  module.exports = { snakeHeaders, unionQuery };

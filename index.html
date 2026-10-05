@@ -207,6 +207,7 @@
       <h2>Source</h2>
       <input type="file" id="file" accept=".xlsx,.xls,.csv" />
       <select id="sheet" hidden></select>
+      <button id="union" hidden>Union all sheets</button>
       <div><small>Table: </small><code id="tbl">-</code></div>
       <h2>Columns</h2>
       <ul id="cols"></ul>
@@ -256,6 +257,7 @@
               Object.fromEntries(cols.map((c, j) => [c, r[j] ?? null])),
             );
           sheets[names[i]] = {
+            label: sn,
             cols: cols.map((name, j) => ({ name, orig: orig[j] })),
             rows,
           };
@@ -267,8 +269,19 @@
         $("sheet").innerHTML = names
           .map((n, i) => `<option value="${n}">${wb.SheetNames[i]}</option>`)
           .join("");
-        $("sheet").hidden = names.length < 2;
+        $("sheet").hidden = $("union").hidden = names.length < 2;
         pick(names[0]);
+      };
+
+      $("union").onclick = () => {
+        $("sql").value = unionQuery(
+          Object.entries(sheets).map(([table, s]) => ({
+            table,
+            label: s.label,
+            cols: s.cols.map((c) => c.name),
+          })),
+        );
+        run();
       };
 
       $("sheet").onchange = () => pick($("sheet").value);
@@ -321,7 +334,11 @@
       }
 
       const fmt = (v) =>
-        v instanceof Date ? v.toISOString().slice(0, 10) : (v ?? "");
+        v instanceof Date
+          ? v.toISOString().slice(0, 10)
+          : v !== null && typeof v === "object"
+            ? JSON.stringify(v)
+            : (v ?? "");
 
       let timer;
       $("sql").oninput = () => (
