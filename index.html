@@ -21,8 +21,6 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232f6f5e'/%3E%3Ctext x='16' y='22' font-size='16' font-family='monospace' font-weight='700' text-anchor='middle' fill='white'%3ESQL%3C/text%3E%3C/svg%3E"
     />
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alasql@4"></script>
     <script src="lib.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,7 +33,7 @@
         --bg: #f6f4ef;
         --panel: #efece4;
         --ink: #1c1b18;
-        --muted: #7a766c;
+        --muted: #5c584f;
         --line: #dedacf;
         --accent: #2f6f5e;
         --accent-ink: #fff;
@@ -323,9 +321,36 @@
       let sheets = {}; // table name -> { cols: [{name, orig}], rows }
       let result = [];
 
+      // xlsx and alasql are ~300 KiB and useless until a file is picked.
+      const load = (src) =>
+        new Promise((ok, fail) => {
+          const s = document.createElement("script");
+          Object.assign(s, { src, onload: ok, onerror: fail });
+          document.head.append(s);
+        });
+      let libs;
+      const ensureLibs = () =>
+        (libs ??= Promise.all([
+          load(
+            "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+          ),
+          load("https://cdn.jsdelivr.net/npm/alasql@4"),
+        ]).catch((e) => ((libs = null), Promise.reject(e))));
+      for (const ev of ["pointerenter", "focus"])
+        $("file").addEventListener(ev, () => ensureLibs().catch(() => {}), {
+          once: true,
+        });
+
       $("file").onchange = async (e) => {
         const f = e.target.files[0];
         if (!f) return;
+        try {
+          await ensureLibs();
+        } catch {
+          $("err").textContent =
+            "Could not load libraries. Check your connection.";
+          return;
+        }
         const wb = XLSX.read(await f.arrayBuffer(), { cellDates: true });
         const names = snakeHeaders(wb.SheetNames);
         sheets = {};
@@ -405,6 +430,7 @@
 
       function run() {
         $("err").textContent = "";
+        if (typeof alasql === "undefined") return;
         try {
           result = alasql($("sql").value);
           if (!Array.isArray(result))
