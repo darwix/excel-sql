@@ -16,16 +16,14 @@ test("dedupes, fills empty, prefixes leading digit", () => {
   );
 });
 
-test("unionQuery tags each sheet with its name and keeps shared columns", () => {
-  const { unionQuery } = require("./lib.js");
-  const sql = unionQuery([
-    { table: "andi", label: "Andi's", cols: ["customer", "qty", "only_a"] },
-    { table: "budi", label: "Budi", cols: ["qty", "customer"] },
+test("stackSheets tags rows with the sheet name and fills missing columns", () => {
+  const { stackSheets } = require("./lib.js");
+  const rows = stackSheets([
+    { label: " Andi ", rows: [{ customer: "a", qty: 1 }] },
+    { label: "Budi", rows: [{ customer: "b", extra: 9 }] },
   ]);
-  assert.strictEqual(
-    sql,
-    "SELECT 'Andi''s' AS sales_person, [customer], [qty] FROM `andi`\n" +
-      "UNION ALL\n" +
-      "SELECT 'Budi' AS sales_person, [customer], [qty] FROM `budi`",
-  );
+  assert.deepStrictEqual(rows, [
+    { sheet_name: "Andi", customer: "a", qty: 1, extra: null },
+    { sheet_name: "Budi", customer: "b", qty: null, extra: 9 },
+  ]);
 });
