@@ -27,3 +27,14 @@ test("stackSheets tags rows with the sheet name and fills missing columns", () =
     { sheet_name: "Budi", customer: "b", qty: null, extra: 9 },
   ]);
 });
+
+test("dropBlankRows removes rows whose cells are all empty or spaces", () => {
+  const { dropBlankRows } = require("./lib.js");
+  assert.deepStrictEqual(
+    dropBlankRows([["a", 1], [null, null], [" ", ""], [0, null], []]),
+    [
+      ["a", 1],
+      [0, null],
+    ],
+  );
+});
