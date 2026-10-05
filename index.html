@@ -140,6 +140,16 @@
         padding: 4px 0;
         border-bottom: 1px solid var(--line);
       }
+      #tables li {
+        cursor: pointer;
+      }
+      #tables li:hover {
+        color: var(--accent);
+      }
+      #tables li[aria-current] {
+        font-weight: 500;
+        color: var(--accent);
+      }
       small {
         color: var(--muted);
       }
@@ -210,6 +220,8 @@
       <div><small>Table: </small><code id="tbl">-</code></div>
       <h2>Columns</h2>
       <ul id="cols"></ul>
+      <h2>Tables</h2>
+      <ul id="tables"></ul>
       <small
         >Every sheet is a table. <code>all_sheets</code> stacks them all, with a
         <code>sheet_name</code> column.</small
@@ -290,8 +302,30 @@
             return li;
           }),
         );
+        listTables(t);
         $("sql").value = `SELECT * FROM ${t}`;
         run();
+      }
+
+      function listTables(current) {
+        $("tables").replaceChildren(
+          ...[...Object.keys(sheets), "all_sheets"].map((t) => {
+            const li = document.createElement("li");
+            li.textContent = t;
+            if (t === current) li.setAttribute("aria-current", "true");
+            li.onclick = () => {
+              if (t in sheets) {
+                $("sheet").value = t;
+                pick(t);
+              } else {
+                listTables(t);
+                $("sql").value = `SELECT * FROM ${t}`;
+                run();
+              }
+            };
+            return li;
+          }),
+        );
       }
 
       function run() {
