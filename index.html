@@ -207,11 +207,13 @@
       <h2>Source</h2>
       <input type="file" id="file" accept=".xlsx,.xls,.csv" />
       <select id="sheet" hidden></select>
-      <button id="union" hidden>Union all sheets</button>
       <div><small>Table: </small><code id="tbl">-</code></div>
       <h2>Columns</h2>
       <ul id="cols"></ul>
-      <small>Every sheet is a table, so JOIN across sheets works.</small>
+      <small
+        >Every sheet is a table. <code>all_sheets</code> stacks them all, with a
+        <code>sheet_name</code> column.</small
+      >
     </aside>
     <main>
       <textarea
@@ -269,19 +271,13 @@
         $("sheet").innerHTML = names
           .map((n, i) => `<option value="${n}">${wb.SheetNames[i]}</option>`)
           .join("");
-        $("sheet").hidden = $("union").hidden = names.length < 2;
-        pick(names[0]);
-      };
-
-      $("union").onclick = () => {
-        $("sql").value = unionQuery(
-          Object.entries(sheets).map(([table, s]) => ({
-            table,
-            label: s.label,
-            cols: s.cols.map((c) => c.name),
-          })),
+        $("sheet").hidden = names.length < 2;
+        const all = stackSheets(
+          Object.values(sheets).map((s) => ({ label: s.label, rows: s.rows })),
         );
-        run();
+        alasql("DROP TABLE IF EXISTS all_sheets; CREATE TABLE all_sheets");
+        alasql.tables.all_sheets.data = all;
+        pick(names[0]);
       };
 
       $("sheet").onchange = () => pick($("sheet").value);
